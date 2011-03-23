@@ -1,5 +1,7 @@
 import zope.interface
 
+from cellmlapi import CellML_APISPEC
+
 from cellml.api.pmr2.interfaces import ICellMLAPIUtility
 
 
@@ -13,7 +15,8 @@ class CellMLAPIUtility(object):
     zope.interface.implements(ICellMLAPIUtility)
 
     def __init__(self):
-        pass
+        self.cellml_bootstrap = CellML_APISPEC.CellMLBootstrap()
+        self.model_loader = self.cellml_bootstrap.getmodelLoader()
 
     def getGenerator(self, obj):
         """\
@@ -38,14 +41,16 @@ class CellMLAPIUtility(object):
         see Interface.
         """
 
-        raise NotImplementedError
+        # XXX as this is NOT reentrant safe, we need to do expand on
+        # this using reentrant safe methods so we can GET ourselves.
+        return self.model_loader.loadFromURL(url)
 
     def serialiseNode(self, node):
         """\
         see Interface.
         """
 
-        raise NotImplementedError
+        return self.cellml_bootstrap.serialiseNode(node)
 
     def extractMaths(self, model):
         """\
@@ -53,4 +58,11 @@ class CellMLAPIUtility(object):
         """
 
         results = []
+        for element in self.getGenerator(model.getallComponents()):
+            component = CellML_APISPEC.CellMLComponent(element)
+            results.append((
+                component.getcmetaId() or component.getname(),
+                [self.cellml_bootstrap.serialiseNode(i) 
+                    for i in self.getGenerator(component.getmath())],
+            ))
         return results
