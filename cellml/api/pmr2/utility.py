@@ -43,7 +43,9 @@ class CellMLAPIUtility(object):
 
         # XXX as this is NOT reentrant safe, we need to do expand on
         # this using reentrant safe methods so we can GET ourselves.
-        return self.model_loader.loadFromURL(url)
+        model = self.model_loader.loadFromURL(url)
+        model.fullyInstantiateImports()
+        return model
 
     def serialiseNode(self, node):
         """\
