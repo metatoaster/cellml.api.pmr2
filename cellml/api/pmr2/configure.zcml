@@ -1,0 +1,11 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    i18n_domain="cellml.api.pmr2">
+
+  <utility
+      factory=".utility.CellMLAPIUtility"
+      provides=".interfaces.ICellMLAPIUtility"
+      />
+
+</configure>
