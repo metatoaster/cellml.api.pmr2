@@ -1,6 +1,6 @@
 import zope.interface
 
-from cellmlapi import CellML_APISPEC
+from cellml_api import CellML_APISPEC
 
 from cellml.api.pmr2.interfaces import ICellMLAPIUtility
 
@@ -43,6 +43,9 @@ class CellMLAPIUtility(object):
 
         # XXX as this is NOT reentrant safe, we need to do expand on
         # this using reentrant safe methods so we can GET ourselves.
+        # XXX really should do our own model loading to pass in extra
+        # authentication and/or cookies to propagate the requesting 
+        # user's credentials to these internal requests.
         model = self.model_loader.loadFromURL(url)
         model.fullyInstantiateImports()
         return model
