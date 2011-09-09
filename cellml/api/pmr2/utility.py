@@ -1,3 +1,6 @@
+from urllib2 import urlopen
+from urlparse import urljoin
+
 import zope.interface
 
 from cellml_api import CellML_APISPEC
@@ -18,23 +21,31 @@ class CellMLAPIUtility(object):
         self.cellml_bootstrap = CellML_APISPEC.CellMLBootstrap()
         self.model_loader = self.cellml_bootstrap.getmodelLoader()
 
-    def getGenerator(self, obj):
+    def getGenerator(self, obj, iterator='iterate', next='next'):
         """\
         see Interface.
         """
 
-        def _generator(iterate):
+        def _generator(func):
             while 1:
-                next = iterate.next()
+                next = func()
                 if next is None:
                     raise StopIteration
                 yield next
 
-        if not (hasattr(obj, 'iterate') and callable(obj.iterate)):
-            raise TypeError("'%s' object is not iterable" % 
-                            obj.__class__.__name__)
+        def getcallable(obj, name):
+            if not hasattr(obj, name):
+                raise TypeError("'%s' object is not iterable with %s" % 
+                                (obj.__class__.__name__, name))
+            result = getattr(obj, name)
+            if not callable(result):
+                raise TypeError("'%s.%s' is not callable" % 
+                                (obj.__class__.__name__, name))
+            return result
 
-        return _generator(obj.iterate())
+        iobj = getcallable(obj, iterator)()
+        nfunc = getcallable(iobj, next)
+        return _generator(nfunc)
 
     def loadModel(self, url):
         """\
@@ -48,6 +59,47 @@ class CellMLAPIUtility(object):
         # user's credentials to these internal requests.
         model = self.model_loader.loadFromURL(url)
         model.fullyInstantiateImports()
+        return model
+
+    def safeLoadModel(self, source_url):
+        """\
+        See Interface.
+        """
+
+        def loadurl(location):
+            # XXX may need to sanitize URLs.
+            # e.g. no loading from file://
+            fd = urlopen(location)
+            result = fd.read()
+            fd.close()
+            return result
+
+        def getImportGenerator(model):
+            imports = model.getimports()
+            importgen = self.getGenerator(imports, 
+                'iterateImports', 'nextImport')
+            return importgen
+
+        importq = []
+
+        source = loadurl(source_url)
+        model = self.model_loader.createFromText(source)
+        importq.append((source_url, list(getImportGenerator(model))))
+
+        while len(importq):
+            # XXX base may be incorrect - check xml:base
+            base, imports = importq.pop(0)
+            for i in imports:
+                relurl = i.getxlinkHref().getasText()
+                nexturl = urljoin(base, relurl)
+                source = loadurl(nexturl)
+                i.instantiateFromText(source)
+                im = i.getimportedModel()
+                # check for further imports
+                subimport = list(getImportGenerator(im))
+                if subimport:
+                    importq.append((nexturl, subimport))
+
         return model
 
     def serialiseNode(self, node):
