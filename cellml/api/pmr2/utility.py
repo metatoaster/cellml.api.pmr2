@@ -1,10 +1,6 @@
-from cStringIO import StringIO
-from lxml import etree
 import zope.interface
 
 from cellml.api.pmr2.interfaces import ICellMLAPIUtility
-
-from cellml.api.simple import mathml
 
 
 class CellMLAPIUtility(object):
@@ -42,9 +38,7 @@ class CellMLAPIUtility(object):
         see Interface.
         """
 
-        # XXX since we don't actually have the bindings ready, this only
-        # pretend to do something.
-        self.url = url
+        raise NotImplementedError
 
     def serialiseNode(self, node):
         """\
@@ -59,22 +53,4 @@ class CellMLAPIUtility(object):
         """
 
         results = []
-        maths = mathml(self.url)
-        namespaces = {'mml': 'http://www.w3.org/1998/Math/MathML'}
-        t = etree.parse(StringIO(maths))
-        results = [
-            (
-                # component name or id
-                comps.xpath('h3')[0].text,
-                [
-                    # list of mathml nodes
-                    etree.tostring(n) for n in comps.xpath(
-                        'div/mml:math',
-                        namespaces=namespaces
-                    )
-                ]
-            )
-            for comps in t.xpath('/div/div')
-        ]
         return results
-
