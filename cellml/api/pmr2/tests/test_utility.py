@@ -65,10 +65,11 @@ class UtilityTestCase(unittest.TestCase):
         fd = urllib2.urlopen(model_path)
         doc = etree.parse(fd)
         fd.close()
+        # add the above as xmlbase into new file in temporary location
         doc.getroot().set('{http://www.w3.org/XML/1998/namespace}base', 
             model_path)
         stream = StringIO(etree.tostring(doc))
-        # add the above as xmlbase into new file in temporary location
+        # use the custom utility with the modified loader
         utility = CustomCellMLAPIUtility()
         tl = utility.loadModel(stream)
         v1 = tl.getimports().iterateImports().nextImport().getimportedModel()
@@ -76,6 +77,19 @@ class UtilityTestCase(unittest.TestCase):
         self.assertComponentName(tl.getmodelComponents(), 'toplevel_component')
         self.assertComponentName(v1.getmodelComponents(), 'level1_component')
         self.assertComponentName(v2.getmodelComponents(), 'level2_component')
+
+    def test_1000_extractMaths(self):
+        model_path = get_path('beeler_reuter_model_1977.cellml')
+        model = self.utility.loadModel(model_path)
+        maths = self.utility.extractMaths(model)
+        self.assertEqual(len(maths), 12)
+        # tuple of (cmetaId or name, list of equations)
+        self.assertEqual(len(maths[1]), 2)
+        # number of equations
+        self.assertEqual(len(maths[1][1]), 1)
+        self.assertEqual(maths[1][0], 'membrane')
+        self.assert_(maths[1][1][0].startswith(
+            '<math xmlns="http://www.w3.org/1998/Math/MathML"'))
 
 
 def test_suite():

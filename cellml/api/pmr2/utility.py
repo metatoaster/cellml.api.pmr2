@@ -107,8 +107,8 @@ class CellMLAPIUtility(object):
         """
 
         results = []
-        for element in makeGenerator(model.getallComponents()):
-            component = CellML_APISPEC.CellMLComponent(element)
+        for component in makeGenerator(model.getallComponents(), 
+                                       key='Component'):
             results.append((
                 component.getcmetaId() or component.getname(),
                 [self.cellml_bootstrap.serialiseNode(i) 
