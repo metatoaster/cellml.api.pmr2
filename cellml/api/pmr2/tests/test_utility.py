@@ -100,6 +100,14 @@ class UtilityTestCase(unittest.TestCase):
         self.assert_(maths[1][1][0].startswith(
             '<math xmlns="http://www.w3.org/1998/Math/MathML"'))
 
+    def test_2000_exportCeleds(self):
+        model_path = get_path('beeler_reuter_1977.cellml')
+        model = self.utility.loadModel(model_path)
+        code = self.utility.exportCeleds(model)
+        # all five language files
+        self.assertEqual(len(code), 5)
+        self.assert_(code['Python'].startswith('# '))
+
 
 def test_suite():
     from unittest import TestSuite, makeSuite
