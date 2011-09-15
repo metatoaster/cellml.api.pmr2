@@ -120,7 +120,7 @@ class CellMLAPIUtility(object):
         pass
 
 
-def makeGenerator(obj, iterator='iterate', next='next', key=None):
+def makeGenerator(obj, key=None, iterator='iterate', next='next'):
     """\
     Takes the object and make a generator from a CellML API object.
 
