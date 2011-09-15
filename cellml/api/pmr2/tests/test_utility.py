@@ -6,6 +6,7 @@ import urllib2
 from urlparse import urljoin
 
 from cellml.api.pmr2.utility import CellMLAPIUtility
+from cellml_api import CellML_APISPEC
 
 
 base = dirname(__file__)
@@ -33,6 +34,7 @@ class UtilityTestCase(unittest.TestCase):
 
     def setUp(self):
         self.utility = CellMLAPIUtility()
+        # Will be testing with file.
         self.utility.approved_protocol.append('file')
 
     def tearDown(self):
@@ -46,7 +48,7 @@ class UtilityTestCase(unittest.TestCase):
         self.assert_(self.utility.cellml_bootstrap)
 
     def test_0100_model_load_standard(self):
-        model_path = get_path('beeler_reuter_model_1977.cellml')
+        model_path = get_path('beeler_reuter_1977-api-test.cellml')
         model = self.utility.loadModel(model_path)
         self.assertEqual(model.getcmetaId(), 
             'beeler_reuter_mammalian_ventricle_1977')
@@ -78,8 +80,15 @@ class UtilityTestCase(unittest.TestCase):
         self.assertComponentName(v1.getmodelComponents(), 'level1_component')
         self.assertComponentName(v2.getmodelComponents(), 'level2_component')
 
+    def test_0200_model_load_broken(self):
+        model_path = get_path('broken_xml.cellml')
+        self.assertRaises(CellML_APISPEC.CellMLException,
+                          self.utility.loadModel, model_path)
+        lastmsg = self.utility.model_loader.getlastErrorMessage()
+        self.assertEqual(lastmsg, 'badxml/3/0//')
+
     def test_1000_extractMaths(self):
-        model_path = get_path('beeler_reuter_model_1977.cellml')
+        model_path = get_path('beeler_reuter_1977-api-test.cellml')
         model = self.utility.loadModel(model_path)
         maths = self.utility.extractMaths(model)
         self.assertEqual(len(maths), 12)

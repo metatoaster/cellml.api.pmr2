@@ -57,7 +57,7 @@ class CellMLAPIUtility(object):
 
         def getImportGenerator(model):
             imports = model.getimports()
-            importgen = makeGenerator(imports, key='Import')
+            importgen = makeGenerator(imports, 'Import')
             return importgen
 
         def appendQueue(base, model):
@@ -107,8 +107,7 @@ class CellMLAPIUtility(object):
         """
 
         results = []
-        for component in makeGenerator(model.getallComponents(), 
-                                       key='Component'):
+        for component in makeGenerator(model.getallComponents(), 'Component'):
             results.append((
                 component.getcmetaId() or component.getname(),
                 [self.cellml_bootstrap.serialiseNode(i) 
