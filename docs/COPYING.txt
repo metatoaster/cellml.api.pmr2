@@ -14,8 +14,8 @@ as they all apply to this software.
 
 Note that some parts of cellm.api.pmr2 links with third-party libraries
 that are not licensed under one or more of the licenses as listed above.
-Such libraries may affect how certain parts of PMR2 are licensed.  Such
-third-party libraries includes:
+Such libraries may affect how certain parts of cellml.api.pmr2 is 
+licensed, which includes:
 
  1) Zope (and libraries)
   * Zope is licensed under the Zope Public License, Version 2.1, which
