@@ -14,6 +14,8 @@ from cellml_api import CellML_APISPEC
 from cellml_api import CeLEDSExporter
 
 from cellml.api.pmr2.interfaces import ICellMLAPIUtility
+from cellml.api.pmr2.interfaces import UnapprovedProtocolError
+
 from cellml.api.pmr2.property import singleton_property
 
 _root = dirname(__file__)
@@ -91,8 +93,8 @@ class CellMLAPIUtility(object):
 
     def loadURL(self, location):
         if not self._validateProtocol:
-            # XXX subclass this error may be better
-            raise ValueError('protocol for the location is not approved')
+            raise UnapprovedProtocolError(
+                'protocol for the location is not approved')
         fd = urllib2.urlopen(location)
         result = fd.read()
         fd.close()
@@ -137,9 +139,7 @@ class CellMLAPIUtility(object):
                 except urllib2.URLError:
                     # XXX silently failing, should log somewhere
                     continue
-                except ValueError:
-                    # XXX subclass to better differentiate between this 
-                    # and other ValueError
+                except UnapprovedProtocolError:
                     continue
                 i.instantiateFromText(base)
                 appendQueue(nexturl, i.getimportedModel())

@@ -2,6 +2,12 @@ import zope.interface
 import zope.schema
 
 
+class UnapprovedProtocolError(ValueError):
+    """\
+    protocol is unapproved.
+    """
+
+
 class ICellMLAPIUtility(zope.interface.Interface):
 
     approved_protocol = zope.schema.List(
