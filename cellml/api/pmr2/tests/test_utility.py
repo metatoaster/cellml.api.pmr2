@@ -97,7 +97,7 @@ class UtilityTestCase(unittest.TestCase):
         v2 = isi.nextImport().getimportedModel()
 
         self.assertComponentName(tl.getmodelComponents(), 'component1')
-        self.assertComponentName(tl.getmodelComponents(), 'component12')
+        self.assertComponentName(tl.getmodelComponents(), 'component2')
 
         self.assertComponentName(v1.getmodelComponents(), 'level1_component')
         self.assertComponentName(v2.getmodelComponents(), 'level2_component')
