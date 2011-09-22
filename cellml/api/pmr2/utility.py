@@ -12,6 +12,7 @@ from zope.schema.fieldproperty import FieldProperty
 
 from cellml_api import CellML_APISPEC
 from cellml_api import CeLEDSExporter
+from cellml_api import VACSS
 
 from cellml.api.pmr2.interfaces import ICellMLAPIUtility
 from cellml.api.pmr2.interfaces import UnapprovedProtocolError
@@ -65,6 +66,10 @@ class CellMLAPIUtility(object):
     @singleton_property
     def model_loader(self):
         return self.cellml_bootstrap.getmodelLoader()
+
+    @singleton_property
+    def vacs_service(self):
+        return VACSS.VACSService()
 
     def _validateProtocol(self, location):
         return urlparse(location).scheme in self.approved_protocol
