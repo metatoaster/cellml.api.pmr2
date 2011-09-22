@@ -135,13 +135,13 @@ class CellMLAPIUtility(object):
                 relurl = i.getxlinkHref().getasText()
                 nexturl = urlparse.urljoin(base, relurl)
                 try:
-                    base = self.loadURL(nexturl)
+                    source = self.loadURL(nexturl)
                 except urllib2.URLError:
                     # XXX silently failing, should log somewhere
                     continue
                 except UnapprovedProtocolError:
                     continue
-                i.instantiateFromText(base)
+                i.instantiateFromText(source)
                 appendQueue(nexturl, i.getimportedModel())
 
         return model

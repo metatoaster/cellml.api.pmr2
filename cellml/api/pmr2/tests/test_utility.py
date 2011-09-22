@@ -80,6 +80,28 @@ class UtilityTestCase(unittest.TestCase):
         self.assertComponentName(v1.getmodelComponents(), 'level1_component')
         self.assertComponentName(v2.getmodelComponents(), 'level2_component')
 
+    def test_0112_model_load_multiple_import(self):
+        model_path = get_path('multiimport.xml')
+        fd = urllib2.urlopen(model_path)
+        doc = etree.parse(fd)
+        fd.close()
+        # add the above as xmlbase into new file in temporary location
+        doc.getroot().set('{http://www.w3.org/XML/1998/namespace}base', 
+            model_path)
+        stream = StringIO(etree.tostring(doc))
+        # use the custom utility with the modified loader
+        utility = CustomCellMLAPIUtility()
+        tl = utility.loadModel(stream)
+        isi = tl.getimports().iterateImports()
+        v1 = isi.nextImport().getimportedModel()
+        v2 = isi.nextImport().getimportedModel()
+
+        self.assertComponentName(tl.getmodelComponents(), 'component1')
+        self.assertComponentName(tl.getmodelComponents(), 'component12')
+
+        self.assertComponentName(v1.getmodelComponents(), 'level1_component')
+        self.assertComponentName(v2.getmodelComponents(), 'level2_component')
+
     def test_0200_model_load_broken(self):
         model_path = get_path('broken_xml.cellml')
         self.assertRaises(CellML_APISPEC.CellMLException,
