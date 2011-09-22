@@ -14,6 +14,7 @@ from cellml_api import CellML_APISPEC
 from cellml_api import CeLEDSExporter
 
 from cellml.api.pmr2.interfaces import ICellMLAPIUtility
+from cellml.api.pmr2.property import singleton_property
 
 _root = dirname(__file__)
 resource_file = lambda *p: join(_root, 'resource', *p)
@@ -46,17 +47,22 @@ class CellMLAPIUtility(object):
         self.approved_protocol = ['http', 'https',]
         self.celeds_exporter = {}
 
-        # maybe we could instantiate some of these on demand.
-        self.cellml_bootstrap = CellML_APISPEC.CellMLBootstrap()
-        self.model_loader = self.cellml_bootstrap.getmodelLoader()
-
-        self.celeds_bootstrap = CeLEDSExporter.CeLEDSExporterBootstrap()
-        # XXX workaround the bug in the API where the constructor for
-        # this is broken.
-        self.celeds_bootstrap = CeLEDSExporter.CeLEDSExporterBootstrap()
-
         # other initializations
         self._initiateCeLEDS()
+
+    @singleton_property
+    def celeds_bootstrap(self):
+        celeds_bootstrap = CeLEDSExporter.CeLEDSExporterBootstrap()
+        return celeds_bootstrap
+
+    @singleton_property
+    def cellml_bootstrap(self):
+        cellml_bootstrap = CellML_APISPEC.CellMLBootstrap()
+        return cellml_bootstrap
+
+    @singleton_property
+    def model_loader(self):
+        return self.cellml_bootstrap.getmodelLoader()
 
     def _validateProtocol(self, location):
         return urlparse(location).scheme in self.approved_protocol
