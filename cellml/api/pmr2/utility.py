@@ -195,6 +195,64 @@ class CellMLAPIUtility(object):
 
         return result
 
+    def validateModel(self, model):
+        """\
+        Validate model.
+        """
+
+        # XXX will not be able to get column unless someone reimplement
+        # VACSService::getPositionInXML to return aColumn rather than
+        # passing that value to it by reference.
+
+        error_types = [
+            VACSS.CellMLRepresentationValidityError,
+            VACSS.CellMLSemanticValidityError,
+        ]
+
+        def iterateResultSet(rs):
+            # XXX this does NOT work for some reason, causes SystemError
+            # I wish this API has standard iterators everywhere...
+            for i in xrange(rs.getnValidityErrors()):
+                yield rs.getValidityError(i)
+
+        def listResultSet(rs):
+            return [rs.getValidityError(i) 
+                for i in xrange(rs.getnValidityErrors())]
+
+        def convertError(error):
+            for et in error_types:
+                try:
+                    return et(error)
+                except:
+                    continue
+
+        failure = 0
+        result = []  # list of error messages.
+        vrset = self.vacs_service.validateModel(model)
+        for vr in listResultSet(vrset):
+            # have to manually cast things to get the type that will
+            # be able to compute the location... why can't these be
+            # computed properties...
+            error = convertError(vr)
+            if error is None:
+                failure += 1
+                continue
+
+            errstr = error.getdescription()
+            errtype = error.getisWarningOnly() and 'Warning' or 'Error'
+            errnode = error.geterrorNode()
+            # since offset appears to be specific to column and since
+            # we can't calculate that, use 0.  Ditto for the actual
+            # column since it expects an integer.
+            errrow = self.vacs_service.getPositionInXML(errnode, 0, 0)
+
+            result.append('Line %d: %s: %s' % (errrow, errtype, errstr))
+
+        if failure:
+            result.append('* there are also %d unknown error(s) reported.')
+
+        return result
+
 
 def makeGenerator(obj, key=None, iterator='iterate', next='next'):
     """\

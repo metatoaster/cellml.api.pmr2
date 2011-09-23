@@ -130,6 +130,21 @@ class UtilityTestCase(unittest.TestCase):
         self.assertEqual(len(code), 5)
         self.assert_(code['Python'].startswith('# '))
 
+    def test_3000_validateModel_clean(self):
+        model_path = get_path('beeler_reuter_1977.cellml')
+        model = self.utility.loadModel(model_path)
+        results = self.utility.validateModel(model)
+        self.assertEqual(len(results), 0)
+
+    def test_3000_validateModel_unclean(self):
+        model_path = get_path('beeler_reuter_1977-api-test.cellml')
+        model = self.utility.loadModel(model_path)
+        results = self.utility.validateModel(model)
+        # Original model does not validate.
+        self.assertNotEqual(len(results), 0)
+        # Would test for the right strings to show up, but wording and
+        # such may change...
+
 
 def test_suite():
     from unittest import TestSuite, makeSuite
