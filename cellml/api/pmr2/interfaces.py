@@ -10,14 +10,6 @@ class UnapprovedProtocolError(ValueError):
 
 class ICellMLAPIUtility(zope.interface.Interface):
 
-    approved_protocol = zope.schema.List(
-        title=u'Approved Protocols',
-        description=u'The list of approved protocols to acquire models from',
-        value_type=zope.schema.ASCIILine(title=u'Protocol type'),
-        unique=True,
-        required=False,
-    )
-
     celeds_exporter = zope.schema.Dict(
         title=u'Available CeLEDS exporter',
         description=u'Dictionary of the instantiated CeLEDS exporter '
@@ -32,16 +24,12 @@ class ICellMLAPIUtility(zope.interface.Interface):
         The list of available CeLEDS exporter.
         """
 
-    def loadURL(location):
-        """\
-        Loads location, return contents as a string.
-
-        Location must be located at an approved protocol.
-        """
-
-    def loadModel(model_url):
+    def loadModel(model_url, opener=None):
         """\
         Loads a model from the given url.
+
+        model_url - URL of the model
+        opener - callable function that can load the desired url.
         """
 
     def serialiseNode(node):
@@ -60,3 +48,20 @@ class ICellMLAPIUtility(zope.interface.Interface):
         Run the model through one or all of the available CeLEDS 
         Exporter.
         """
+
+
+class IURLOpener(zope.interface.Interface):
+    """\
+    Interface for the URL Opener
+
+    Contains methods that will control a list of permissible URL schemes
+    and other special methods.
+    """
+
+    approved_protocol = zope.schema.List(
+        title=u'Approved Protocols',
+        description=u'The list of approved protocols to acquire models from',
+        value_type=zope.schema.ASCIILine(title=u'Protocol type'),
+        unique=True,
+        required=False,
+    )

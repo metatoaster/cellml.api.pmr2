@@ -15,6 +15,7 @@ from cellml_api import CeLEDSExporter
 from cellml_api import VACSS
 
 from cellml.api.pmr2.interfaces import ICellMLAPIUtility
+from cellml.api.pmr2.interfaces import IURLOpener
 from cellml.api.pmr2.interfaces import UnapprovedProtocolError
 
 from cellml.api.pmr2.property import singleton_property
@@ -42,16 +43,18 @@ class CellMLAPIUtility(object):
 
     zope.interface.implements(ICellMLAPIUtility)
 
-    approved_protocol = FieldProperty(ICellMLAPIUtility['approved_protocol'])
     celeds_exporter = FieldProperty(ICellMLAPIUtility['celeds_exporter'])
 
     def __init__(self):
         # set non-primative defaults
-        self.approved_protocol = ['http', 'https',]
         self.celeds_exporter = {}
 
         # other initializations
         self._initiateCeLEDS()
+
+    @singleton_property
+    def url_opener(self):
+        return DefaultURLOpener()
 
     @singleton_property
     def celeds_bootstrap(self):
@@ -70,9 +73,6 @@ class CellMLAPIUtility(object):
     @singleton_property
     def vacs_service(self):
         return VACSS.VACSService()
-
-    def _validateProtocol(self, location):
-        return urlparse(location).scheme in self.approved_protocol
 
     def _initiateCeLEDS(self):
         """\
@@ -96,16 +96,7 @@ class CellMLAPIUtility(object):
 
         return self.celeds_exporter.key()
 
-    def loadURL(self, location):
-        if not self._validateProtocol:
-            raise UnapprovedProtocolError(
-                'protocol for the location is not approved')
-        fd = urllib2.urlopen(location)
-        result = fd.read()
-        fd.close()
-        return result
-
-    def loadModel(self, model_url):
+    def loadModel(self, model_url, loader=None):
         """\
         Loads the CellML Model at the specified URL.
 
@@ -129,7 +120,10 @@ class CellMLAPIUtility(object):
 
         importq = []
 
-        base = self.loadURL(model_url)
+        if loader is None:
+            loader = self.url_opener
+
+        base = loader(model_url)
         model = self.model_loader.createFromText(base)
         appendQueue(model_url, model)
 
@@ -140,7 +134,7 @@ class CellMLAPIUtility(object):
                 relurl = i.getxlinkHref().getasText()
                 nexturl = urlparse.urljoin(base, relurl)
                 try:
-                    source = self.loadURL(nexturl)
+                    source = loader(nexturl)
                 except urllib2.URLError:
                     # XXX silently failing, should log somewhere
                     continue
@@ -252,6 +246,34 @@ class CellMLAPIUtility(object):
             result.append('* there are also %d unknown error(s) reported.')
 
         return result
+
+
+class DefaultURLOpener(object):
+    """\
+    Default implementation of the URL opener.
+    """
+
+    zope.interface.implements(IURLOpener)
+
+    approved_protocol = FieldProperty(IURLOpener['approved_protocol'])
+
+    def __init__(self):
+        self.approved_protocol = ['http', 'https',]
+
+    def _validateProtocol(self, location):
+        return urlparse.urlparse(location).scheme in self.approved_protocol
+
+    def loadURL(self, location):
+        if not self._validateProtocol(location):
+            raise UnapprovedProtocolError(
+                'protocol for the location is not approved')
+        fd = urllib2.urlopen(location)
+        result = fd.read()
+        fd.close()
+        return result
+
+    def __call__(self, location):
+        return self.loadURL(location)
 
 
 def makeGenerator(obj, key=None, iterator='iterate', next='next'):
