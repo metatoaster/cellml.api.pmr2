@@ -7,7 +7,7 @@ from urlparse import urljoin
 
 from cellml.api.pmr2.interfaces import UnapprovedProtocolError
 from cellml.api.pmr2.utility import CellMLAPIUtility
-from cellml.api.pmr2.utility import DefaultURLOpener
+from cellml.api.pmr2.urlopener import DefaultURLOpener
 from cellml_api import CellML_APISPEC
 
 
