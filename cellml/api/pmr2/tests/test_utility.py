@@ -17,27 +17,28 @@ input_p = 'input'
 get_path = lambda *p: urljoin('file://', join(base, input_p, *p))
 
 
-class CustomURLOpener(DefaultURLOpener):
+class StreamURLOpener(DefaultURLOpener):
+    """
+    Allow a stream object to be passed as a location, and it is treated
+    as a valid protocol and is loaded via reading itself.
+    """
+
+    def validateProtocol(self, location):
+        if hasattr(location, 'read'):
+            return True
+        return DefaultURLOpener.validateProtocol(self, location)
 
     def loadURL(self, location):
-        """
-        Allow a stream object to be passed as a location
-        """
-
         if hasattr(location, 'read'):
             return location.read()
-        else:
-            return DefaultURLOpener.loadURL(self, location)
-
-    # loadModel should not need redefining as the stream object should
-    # be replaced by the xml:base in test_0111.
+        return DefaultURLOpener.loadURL(self, location)
 
 
 class UtilityTestCase(unittest.TestCase):
 
     def setUp(self):
         self.utility = CellMLAPIUtility()
-        self.opener = CustomURLOpener()
+        self.opener = StreamURLOpener()
         self.opener.approved_protocol.append('file')
 
     def tearDown(self):

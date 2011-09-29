@@ -56,6 +56,8 @@ class IURLOpener(zope.interface.Interface):
 
     Contains methods that will control a list of permissible URL schemes
     and other special methods.
+
+    Callable must call and return loadURL.
     """
 
     approved_protocol = zope.schema.List(
@@ -65,3 +67,14 @@ class IURLOpener(zope.interface.Interface):
         unique=True,
         required=False,
     )
+
+    def validateProtocol(location):
+        """\
+        Validate the location to check if URL is allowed to be opened.
+        """
+
+    def loadURL(location):
+        """\
+        The method that opens the URL and return the contents as a 
+        string.
+        """
