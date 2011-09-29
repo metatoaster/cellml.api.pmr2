@@ -57,6 +57,12 @@ class UtilityTestCase(unittest.TestCase):
         self.assertRaises(UnapprovedProtocolError,
                           self.utility.loadModel, model_path)
 
+    def test_0011_notopener(self):
+        opener = object()
+        # please fail
+        self.assertRaises(AssertionError, self.utility.loadModel, 
+            'fail', opener)
+
     def test_0100_model_load_standard(self):
         model_path = get_path('beeler_reuter_1977-api-test.cellml')
         model = self.utility.loadModel(model_path, self.opener)

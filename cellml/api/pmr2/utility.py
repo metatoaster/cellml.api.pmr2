@@ -15,6 +15,7 @@ from cellml_api import CeLEDSExporter
 from cellml_api import VACSS
 
 from cellml.api.pmr2.interfaces import ICellMLAPIUtility
+from cellml.api.pmr2.interfaces import IURLOpener
 from cellml.api.pmr2.interfaces import UnapprovedProtocolError
 
 from cellml.api.pmr2.property import singleton_property
@@ -103,6 +104,10 @@ class CellMLAPIUtility(object):
         This implementation does not use the built-in load model method
         in the model loader to avoid getting into non-reentrant issues
         that plagues that method.
+
+        The optional loader parameter allows the caller to replace with
+        a specialized version (subclassed from BaseURLOpener) that will
+        be used to load the model_url.
         """
 
         def getImportGenerator(model):
@@ -112,23 +117,22 @@ class CellMLAPIUtility(object):
 
         def appendQueue(base, model):
             # need to remember the source that this import was derived 
-            # from, and use the xml:base of it if set.
+            # from; use the xml:base of the model if available.
             base_url = model.getxmlBase().getasText() or base
             subimport = list(getImportGenerator(model))
             if subimport:
                 importq.append((base_url, subimport,))
 
-        importq = []
-
         if loader is None:
             loader = self.url_opener
+        assert IURLOpener.providedBy(loader)
 
+        importq = []
         base = loader(model_url)
         model = self.model_loader.createFromText(base)
         appendQueue(model_url, model)
 
         while len(importq):
-            # XXX base may be incorrect - check xml:base
             base, imports = importq.pop(0)
             for i in imports:
                 relurl = i.getxlinkHref().getasText()
