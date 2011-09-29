@@ -41,8 +41,17 @@ class DefaultURLOpener(BaseURLOpener):
     def validateProtocol(self, location):
         return urlparse.urlparse(location).scheme in self.approved_protocol
 
-    def loadURL(self, location):
-        fd = urllib2.urlopen(location)
-        result = fd.read()
-        fd.close()
+    def loadURL(self, location, headers=None):
+        request = urllib2.Request(location)
+        request.add_header('User-agent', 
+            # XXX temporary user agent header
+            'cellml.api.pmr2/0.0 (http://models.cellml.org/;)')
+
+        if headers:
+            for k, v in headers:
+                request.add_header(k, v)
+
+        response = urllib2.urlopen(request)
+        result = response.read()
+        response.close()
         return result

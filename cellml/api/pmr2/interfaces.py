@@ -73,8 +73,11 @@ class IURLOpener(zope.interface.Interface):
         Validate the location to check if URL is allowed to be opened.
         """
 
-    def loadURL(location):
+    def loadURL(location, headers=None):
         """\
         The method that opens the URL and return the contents as a 
         string.
+
+        location - the location to open
+        headers - a list of key/value pairs of the headers to add.
         """
