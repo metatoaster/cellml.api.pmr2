@@ -17,6 +17,8 @@ cellml/api/pmr2/__init__.py
 cellml/api/pmr2/configure.zcml
 cellml/api/pmr2/interfaces.py
 cellml/api/pmr2/observer.py
+cellml/api/pmr2/property.py
+cellml/api/pmr2/urlopener.py
 cellml/api/pmr2/utility.py
 cellml/api/pmr2/resource/celeds/C.xml
 cellml/api/pmr2/resource/celeds/C_IDA.xml
@@ -24,11 +26,14 @@ cellml/api/pmr2/resource/celeds/F77.xml
 cellml/api/pmr2/resource/celeds/MATLAB.xml
 cellml/api/pmr2/resource/celeds/Python.xml
 cellml/api/pmr2/tests/__init__.py
+cellml/api/pmr2/tests/test_property.py
+cellml/api/pmr2/tests/test_urlopener.py
 cellml/api/pmr2/tests/test_utility.py
 cellml/api/pmr2/tests/input/beeler_reuter_1977-api-test.cellml
 cellml/api/pmr2/tests/input/beeler_reuter_1977.cellml
 cellml/api/pmr2/tests/input/broken_xml.cellml
 cellml/api/pmr2/tests/input/level2.xml
+cellml/api/pmr2/tests/input/multiimport.xml
 cellml/api/pmr2/tests/input/subdir1/level1.xml
 cellml/api/pmr2/tests/input/subdir1/subdir2/toplevel.xml
 docs/COPYING.txt
