@@ -1,10 +1,15 @@
 Changelog
 =========
 
+0.3 - Unreleased
+----------------
+
+* Updated to make use of cgrspy.
+
 0.2 - Released (2012-02-13)
 ---------------------------
 
-* Made use of the Python bindings as found in CellML API 1.11.
+* Made use of the Python bindings as found in CellML API 1.10.
 
 
 0.1 - Released (2011-04-08)
