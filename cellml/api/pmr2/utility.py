@@ -10,9 +10,11 @@ import urlparse
 import zope.interface
 from zope.schema.fieldproperty import FieldProperty
 
-from cellml_api import CellML_APISPEC
-from cellml_api import CeLEDSExporter
-from cellml_api import VACSS
+#from cellml_api import CellML_APISPEC
+#from cellml_api import CeLEDSExporter
+#from cellml_api import VACSS
+
+import cgrspy.bootstrap
 
 from cellml.api.pmr2.interfaces import ICellMLAPIUtility
 from cellml.api.pmr2.interfaces import IURLOpener
@@ -59,21 +61,33 @@ class CellMLAPIUtility(object):
 
     @singleton_property
     def celeds_bootstrap(self):
-        celeds_bootstrap = CeLEDSExporter.CeLEDSExporterBootstrap()
+        cgrspy.bootstrap.loadGenericModule('cgrs_celeds')
+        celeds_bootstrap = cgrspy.bootstrap.fetch(
+            'CreateCeLEDSBootstrap')
         return celeds_bootstrap
 
     @singleton_property
+    def celedsexporter_bootstrap(self):
+        cgrspy.bootstrap.loadGenericModule('cgrs_celedsexporter')
+        celedsexporter_bootstrap = cgrspy.bootstrap.fetch(
+            'CreateCeLEDSExporterBootstrap')
+        return celedsexporter_bootstrap
+
+    @singleton_property
     def cellml_bootstrap(self):
-        cellml_bootstrap = CellML_APISPEC.CellMLBootstrap()
+        cgrspy.bootstrap.loadGenericModule('cgrs_cellml')
+        cellml_bootstrap = cgrspy.bootstrap.fetch('CreateCellMLBootstrap')
         return cellml_bootstrap
 
     @singleton_property
     def model_loader(self):
-        return self.cellml_bootstrap.getmodelLoader()
+        return self.cellml_bootstrap.modelLoader
 
     @singleton_property
     def vacs_service(self):
-        return VACSS.VACSService()
+        cgrspy.bootstrap.loadGenericModule('cgrs_vacss')
+        vacs_service = cgrspy.bootstrap.fetch('CreateVACSService')
+        return vacs_service
 
     def _initiateCeLEDS(self):
         """\
@@ -87,7 +101,7 @@ class CellMLAPIUtility(object):
             fd.close()
 
             key, ext = splitext(filename)
-            exporter = self.celeds_bootstrap.createExporterFromText(raw)
+            exporter = self.celedsexporter_bootstrap.createExporterFromText(raw)
 
             self.celeds_exporter[key] = exporter
 
@@ -111,14 +125,14 @@ class CellMLAPIUtility(object):
         """
 
         def getImportGenerator(model):
-            imports = model.getimports()
+            imports = model.imports
             importgen = makeGenerator(imports, 'Import')
             return importgen
 
         def appendQueue(base, model):
             # need to remember the source that this import was derived 
             # from; use the xml:base of the model if available.
-            base_url = model.getxmlBase().getasText() or base
+            base_url = model.xmlBase.asText or base
             subimport = list(getImportGenerator(model))
             if subimport:
                 importq.append((base_url, subimport,))
@@ -135,7 +149,7 @@ class CellMLAPIUtility(object):
         while len(importq):
             base, imports = importq.pop(0)
             for i in imports:
-                relurl = i.getxlinkHref().getasText()
+                relurl = i.xlinkHref.asText
                 nexturl = urlparse.urljoin(base, relurl)
                 try:
                     source = loader(nexturl)
@@ -145,7 +159,7 @@ class CellMLAPIUtility(object):
                 except UnapprovedProtocolError:
                     continue
                 i.instantiateFromText(source)
-                appendQueue(nexturl, i.getimportedModel())
+                appendQueue(nexturl, i.importedModel)
 
         return model
 
@@ -162,11 +176,11 @@ class CellMLAPIUtility(object):
         """
 
         results = []
-        for component in makeGenerator(model.getallComponents(), 'Component'):
+        for component in makeGenerator(model.allComponents, 'Component'):
             results.append((
-                component.getcmetaId() or component.getname(),
+                component.cmetaId or component.name,
                 [self.serialiseNode(i) 
-                    for i in makeGenerator(component.getmath())],
+                    for i in makeGenerator(component.math)],
             ))
         return results
 
@@ -203,8 +217,8 @@ class CellMLAPIUtility(object):
         # passing that value to it by reference.
 
         error_types = [
-            VACSS.CellMLRepresentationValidityError,
-            VACSS.CellMLSemanticValidityError,
+        #    VACSS.CellMLRepresentationValidityError,
+        #    VACSS.CellMLSemanticValidityError,
         ]
 
         def iterateResultSet(rs):
@@ -215,7 +229,7 @@ class CellMLAPIUtility(object):
 
         def listResultSet(rs):
             return [rs.getValidityError(i) 
-                for i in xrange(rs.getnValidityErrors())]
+                for i in xrange(rs.nValidityErrors)]
 
         def convertError(error):
             for et in error_types:

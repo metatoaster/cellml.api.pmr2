@@ -8,7 +8,6 @@ from urlparse import urljoin
 from cellml.api.pmr2.interfaces import UnapprovedProtocolError
 from cellml.api.pmr2.urlopener import BaseURLOpener
 from cellml.api.pmr2.urlopener import DefaultURLOpener
-from cellml_api import CellML_APISPEC
 
 
 class URLOpenerTestCase(unittest.TestCase):

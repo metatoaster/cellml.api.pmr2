@@ -8,7 +8,6 @@ from urlparse import urljoin
 from cellml.api.pmr2.interfaces import UnapprovedProtocolError
 from cellml.api.pmr2.utility import CellMLAPIUtility
 from cellml.api.pmr2.urlopener import DefaultURLOpener
-from cellml_api import CellML_APISPEC
 
 
 base = dirname(__file__)
@@ -46,7 +45,7 @@ class UtilityTestCase(unittest.TestCase):
 
     def assertComponentName(self, componentSet, name):
         comp = componentSet.getComponent(name)
-        self.assertEqual(comp.getname(), name)
+        self.assertEqual(comp.name, name)
 
     def test_0000_basic(self):
         self.assert_(self.utility.cellml_bootstrap)
@@ -66,17 +65,17 @@ class UtilityTestCase(unittest.TestCase):
     def test_0100_model_load_standard(self):
         model_path = get_path('beeler_reuter_1977-api-test.cellml')
         model = self.utility.loadModel(model_path, self.opener)
-        self.assertEqual(model.getcmetaId(), 
+        self.assertEqual(model.cmetaId,
             'beeler_reuter_mammalian_ventricle_1977')
 
     def test_0110_model_load_imported(self):
         model_path = get_path('subdir1', 'subdir2', 'toplevel.xml')
         tl = self.utility.loadModel(model_path, self.opener)
-        v1 = tl.getimports().iterateImports().nextImport().getimportedModel()
-        v2 = v1.getimports().iterateImports().nextImport().getimportedModel()
-        self.assertComponentName(tl.getmodelComponents(), 'toplevel_component')
-        self.assertComponentName(v1.getmodelComponents(), 'level1_component')
-        self.assertComponentName(v2.getmodelComponents(), 'level2_component')
+        v1 = tl.imports.iterateImports().nextImport().importedModel
+        v2 = v1.imports.iterateImports().nextImport().importedModel
+        self.assertComponentName(tl.modelComponents, 'toplevel_component')
+        self.assertComponentName(v1.modelComponents, 'level1_component')
+        self.assertComponentName(v2.modelComponents, 'level2_component')
 
     def test_0111_model_load_imported(self):
         model_path = get_path('subdir1', 'subdir2', 'toplevel.xml')
@@ -89,11 +88,11 @@ class UtilityTestCase(unittest.TestCase):
         stream = StringIO(etree.tostring(doc))
         # use the custom utility with the modified loader
         tl = self.utility.loadModel(stream, self.opener)
-        v1 = tl.getimports().iterateImports().nextImport().getimportedModel()
-        v2 = v1.getimports().iterateImports().nextImport().getimportedModel()
-        self.assertComponentName(tl.getmodelComponents(), 'toplevel_component')
-        self.assertComponentName(v1.getmodelComponents(), 'level1_component')
-        self.assertComponentName(v2.getmodelComponents(), 'level2_component')
+        v1 = tl.imports.iterateImports().nextImport().importedModel
+        v2 = v1.imports.iterateImports().nextImport().importedModel
+        self.assertComponentName(tl.modelComponents, 'toplevel_component')
+        self.assertComponentName(v1.modelComponents, 'level1_component')
+        self.assertComponentName(v2.modelComponents, 'level2_component')
 
     def test_0112_model_load_multiple_import(self):
         model_path = get_path('multiimport.xml')
@@ -106,21 +105,21 @@ class UtilityTestCase(unittest.TestCase):
         stream = StringIO(etree.tostring(doc))
         # use the custom utility with the modified loader
         tl = self.utility.loadModel(stream, self.opener)
-        isi = tl.getimports().iterateImports()
-        v1 = isi.nextImport().getimportedModel()
-        v2 = isi.nextImport().getimportedModel()
+        isi = tl.imports.iterateImports()
+        v1 = isi.nextImport().importedModel
+        v2 = isi.nextImport().importedModel
 
-        self.assertComponentName(tl.getmodelComponents(), 'component1')
-        self.assertComponentName(tl.getmodelComponents(), 'component2')
+        self.assertComponentName(tl.modelComponents, 'component1')
+        self.assertComponentName(tl.modelComponents, 'component2')
 
-        self.assertComponentName(v1.getmodelComponents(), 'level1_component')
-        self.assertComponentName(v2.getmodelComponents(), 'level2_component')
+        self.assertComponentName(v1.modelComponents, 'level1_component')
+        self.assertComponentName(v2.modelComponents, 'level2_component')
 
     def test_0200_model_load_broken(self):
         model_path = get_path('broken_xml.cellml')
-        self.assertRaises(CellML_APISPEC.CellMLException,
+        self.assertRaises(ValueError,
                           self.utility.loadModel, model_path, self.opener)
-        lastmsg = self.utility.model_loader.getlastErrorMessage()
+        lastmsg = self.utility.model_loader.lastErrorMessage
         self.assertEqual(lastmsg, 'badxml/3/0//')
 
     def test_1000_extractMaths(self):
