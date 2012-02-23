@@ -145,6 +145,10 @@ class UtilityTestCase(unittest.TestCase):
         self.assertTrue('F77' in code.keys())
         self.assertTrue('MATLAB' in code.keys())
         self.assertTrue(code['Python'].startswith('# '))
+        self.assertTrue('i_Na in component sodium_current (uA_per_mm2)'
+                        in code['Python'])
+        self.assertTrue('-84.624'
+                        in code['Python'])
 
     def test_3000_validateModel_clean(self):
         model_path = get_path('beeler_reuter_1977.cellml')
