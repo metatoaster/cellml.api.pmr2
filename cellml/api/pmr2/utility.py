@@ -10,10 +10,6 @@ import urlparse
 import zope.interface
 from zope.schema.fieldproperty import FieldProperty
 
-#from cellml_api import CellML_APISPEC
-#from cellml_api import CeLEDSExporter
-#from cellml_api import VACSS
-
 import cgrspy.bootstrap
 
 from cellml.api.pmr2.interfaces import ICellMLAPIUtility
@@ -212,56 +208,25 @@ class CellMLAPIUtility(object):
         Validate model.
         """
 
-        # XXX will not be able to get column unless someone reimplement
-        # VACSService::getPositionInXML to return aColumn rather than
-        # passing that value to it by reference.
-
-        error_types = [
-        #    VACSS.CellMLRepresentationValidityError,
-        #    VACSS.CellMLSemanticValidityError,
-        ]
-
         def iterateResultSet(rs):
-            # XXX this does NOT work for some reason, causes SystemError
-            # I wish this API has standard iterators everywhere...
-            for i in xrange(rs.getnValidityErrors()):
+            for i in xrange(rs.nValidityErrors):
                 yield rs.getValidityError(i)
 
-        def listResultSet(rs):
-            return [rs.getValidityError(i) 
-                for i in xrange(rs.nValidityErrors)]
-
-        def convertError(error):
-            for et in error_types:
-                try:
-                    return et(error)
-                except:
-                    continue
-
-        failure = 0
         result = []  # list of error messages.
         vrset = self.vacs_service.validateModel(model)
-        for vr in listResultSet(vrset):
+        for error in iterateResultSet(vrset): #listResultSet(vrset):
             # have to manually cast things to get the type that will
             # be able to compute the location... why can't these be
             # computed properties...
-            error = convertError(vr)
-            if error is None:
-                failure += 1
-                continue
+            errstr = error.description
+            errtype = error.isWarningOnly and 'Warning' or 'Error'
+            errnode = error.errorNode
+            # since offset appears to be specific to row and we don't
+            # calculate that, assume 1 to offset the xml header.
+            errrow, errcol = self.vacs_service.getPositionInXML(errnode, 1)
 
-            errstr = error.getdescription()
-            errtype = error.getisWarningOnly() and 'Warning' or 'Error'
-            errnode = error.geterrorNode()
-            # since offset appears to be specific to column and since
-            # we can't calculate that, use 0.  Ditto for the actual
-            # column since it expects an integer.
-            errrow = self.vacs_service.getPositionInXML(errnode, 0, 0)
-
-            result.append('Line %d: %s: %s' % (errrow, errtype, errstr))
-
-        if failure:
-            result.append('* there are also %d unknown error(s) reported.')
+            result.append('Line %d, Col %d: %s: %s' % 
+                (errrow, errcol, errtype, errstr))
 
         return result
 
