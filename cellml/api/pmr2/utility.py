@@ -120,18 +120,12 @@ class CellMLAPIUtility(object):
         be used to load the model_url.
         """
 
-        def getImportGenerator(model):
-            imports = model.imports
-            importgen = makeGenerator(imports, 'Import')
-            return importgen
-
         def appendQueue(base, model):
             # need to remember the source that this import was derived 
             # from; use the xml:base of the model if available.
             base_url = model.xmlBase.asText or base
-            subimport = list(getImportGenerator(model))
-            if subimport:
-                importq.append((base_url, subimport,))
+            subimports = model.imports
+            importq.append((base_url, subimports,))
 
         if loader is None:
             loader = self.url_opener
@@ -172,11 +166,10 @@ class CellMLAPIUtility(object):
         """
 
         results = []
-        for component in makeGenerator(model.allComponents, 'Component'):
+        for component in model.allComponents:
             results.append((
                 component.cmetaId or component.name,
-                [self.serialiseNode(i) 
-                    for i in makeGenerator(component.math)],
+                [self.serialiseNode(i) for i in component.math],
             ))
         return results
 
@@ -229,43 +222,3 @@ class CellMLAPIUtility(object):
                 (errrow, errcol, errtype, errstr))
 
         return result
-
-
-def makeGenerator(obj, key=None, iterator='iterate', next='next'):
-    """\
-    Takes the object and make a generator from a CellML API object.
-
-    This is needed because the CellML API does not support standard
-    iterators, and having them makes the API twice as easy to use.
-
-    obj - object to attempt to get iterator from
-    iterator - the iterator method
-    next - the next method for the iterator
-    key - short cut parameters; if set, this sets the iterator to be
-          iterator${key}s and next to be next${key}
-    """
-
-    def _generator(func):
-        while 1:
-            next = func()
-            if next is None:
-                raise StopIteration
-            yield next
-
-    def getcallable(obj, name):
-        if not hasattr(obj, name):
-            raise TypeError("'%s' object is not iterable with %s" % 
-                            (obj.__class__.__name__, name))
-        result = getattr(obj, name)
-        if not callable(result):
-            raise TypeError("'%s.%s' is not callable" % 
-                            (obj.__class__.__name__, name))
-        return result
-
-    if key is not None:
-        iterator = 'iterate%ss' % key
-        next = 'next%s' % key
-
-    iobj = getcallable(obj, iterator)()
-    nfunc = getcallable(iobj, next)
-    return _generator(nfunc)
