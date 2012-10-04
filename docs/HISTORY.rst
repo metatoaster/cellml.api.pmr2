@@ -1,8 +1,8 @@
 Changelog
 =========
 
-0.3 - Unreleased
-----------------
+0.3 - Released (2012-10-03)
+---------------------------
 
 * Updated to make use of cgrspy.
 
