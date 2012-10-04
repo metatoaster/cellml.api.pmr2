@@ -132,8 +132,8 @@ class CellMLAPIUtility(object):
         assert IURLOpener.providedBy(loader)
 
         importq = []
-        base = loader(model_url)
-        model = self.model_loader.createFromText(base)
+        model_string = loader(model_url)
+        model = self.model_loader.createFromText(model_string)
         appendQueue(model_url, model)
 
         while len(importq):

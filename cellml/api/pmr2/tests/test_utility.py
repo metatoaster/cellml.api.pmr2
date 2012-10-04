@@ -167,10 +167,30 @@ class UtilityTestCase(unittest.TestCase):
         self.assertEqual(results[0][:5], 'Line ')
 
 
+class LiveUtilityTestCase(unittest.TestCase):
+    level = 9
+
+    def setUp(self):
+        self.utility = CellMLAPIUtility()
+
+    def tearDown(self):
+        pass
+
+    def test_1000_utf8_byte_order_mark_http(self):
+        url = 'http://models.cellml.org/w/dcowan/Sulman_et_al_2008/' \
+              '@@rawfile/4b3391441d19e5fab999246f36facd26b86bb3b4/' \
+              'Ekb-Oxford_Changed.cellml'
+
+        model = self.utility.loadModel(url)
+        self.assertEqual(model.cmetaId,
+            'ekaterinburg_rat')
+
+
 def test_suite():
     from unittest import TestSuite, makeSuite
     suite = TestSuite()
     suite.addTest(makeSuite(UtilityTestCase))
+    suite.addTest(makeSuite(LiveUtilityTestCase))
     return suite
 
 if __name__ == '__main__':
