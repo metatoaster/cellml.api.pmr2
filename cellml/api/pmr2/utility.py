@@ -138,7 +138,7 @@ class CellMLAPIUtility(object):
         model_string = loader(model_url)
         # workaround for lack of encoding detection regardless of input.
         try:
-            encoding = etree.load(StringIO(model_string)).docinfo.encoding
+            encoding = etree.parse(StringIO(model_string)).docinfo.encoding
         except:
             encoding = 'ISO-8859-1'
         model = self.model_loader.createFromText(model_string.decode(encoding))

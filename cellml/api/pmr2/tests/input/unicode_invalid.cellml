@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<model name="unicode_invalid" cmeta:id="unicode_invalid"
+  xmlns="http://www.cellml.org/cellml/1.0#"
+  xmlns:cellml="http://www.cellml.org/cellml/1.0#"
+  xmlns:cmeta="http://www.cellml.org/metadata/1.0#">
+  <!--
+    a longdash — comment
+  -->
+</model>
