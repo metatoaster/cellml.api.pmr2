@@ -4,6 +4,9 @@ from os.path import join
 from os.path import dirname
 from os.path import splitext
 
+from cStringIO import StringIO
+
+from lxml import etree
 import urllib2
 import urlparse
 
@@ -133,7 +136,12 @@ class CellMLAPIUtility(object):
 
         importq = []
         model_string = loader(model_url)
-        model = self.model_loader.createFromText(model_string)
+        # workaround for lack of encoding detection regardless of input.
+        try:
+            encoding = etree.load(StringIO(model_string)).docinfo.encoding
+        except:
+            encoding = 'ISO-8859-1'
+        model = self.model_loader.createFromText(model_string.decode(encoding))
         appendQueue(model_url, model)
 
         while len(importq):

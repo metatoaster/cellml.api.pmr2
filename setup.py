@@ -26,6 +26,7 @@ setup(name='cellml.api.pmr2',
           'setuptools',
           # -*- Extra requirements: -*-
           'cgrspy',
+          'lxml',
       ],
       entry_points="""
       # -*- Entry points: -*-
