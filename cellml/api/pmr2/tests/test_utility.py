@@ -122,6 +122,11 @@ class UtilityTestCase(unittest.TestCase):
         lastmsg = self.utility.model_loader.lastErrorMessage
         self.assertEqual(lastmsg, 'badxml/3/0//')
 
+    def test_0300_unicode(self):
+        model_path = get_path('unicode_valid.cellml')
+        model = self.utility.loadModel(model_path, self.opener)
+        self.assertEqual(model.cmetaId, 'unicode_valid')
+
     def test_1000_extractMaths(self):
         model_path = get_path('beeler_reuter_1977-api-test.cellml')
         model = self.utility.loadModel(model_path, self.opener)
