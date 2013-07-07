@@ -95,6 +95,8 @@ class CellMLAPIUtility(object):
         """
 
         for filename in listdir(resource_file('celeds')):
+            if not filename.endswith('.xml'):
+                continue
             fd = open(resource_file('celeds', filename))
             raw = fd.read()
             fd.close()
