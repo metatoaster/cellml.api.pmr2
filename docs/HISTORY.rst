@@ -1,6 +1,13 @@
 Changelog
 =========
 
+0.4 - Released (2013-07-08)
+---------------------------
+
+* Include the latest CeLEDS file from the CellML API.
+* Reconciled the difference in the types to represent UTF-8 encoded
+  strings.
+
 0.3 - Released (2012-10-03)
 ---------------------------
 
