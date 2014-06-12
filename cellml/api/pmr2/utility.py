@@ -8,7 +8,6 @@ from cStringIO import StringIO
 
 from lxml import etree
 import urllib2
-import urlparse
 
 import zope.interface
 from zope.schema.fieldproperty import FieldProperty
@@ -150,7 +149,7 @@ class CellMLAPIUtility(object):
             base, imports = importq.pop(0)
             for i in imports:
                 relurl = i.xlinkHref.asText
-                nexturl = urlparse.urljoin(base, relurl)
+                nexturl = loader.urljoin(base, relurl)
                 try:
                     source = loader(nexturl)
                 except urllib2.URLError:

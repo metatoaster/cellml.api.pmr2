@@ -23,6 +23,9 @@ class BaseURLOpener(object):
     def loadURL(self, location):
         raise NotImplementedError
 
+    def urljoin(self, *a, **kw):
+        return urlparse.urljoin(*a, **kw)
+
     def __call__(self, location):
         if not self.validateProtocol(location):
             raise UnapprovedProtocolError(
