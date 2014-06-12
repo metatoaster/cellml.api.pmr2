@@ -1,6 +1,12 @@
 Changelog
 =========
 
+0.5 - Unreleased
+----------------
+
+* Allow the overriding of standard urljoin methods for alternative url
+  openers.
+
 0.4 - Released (2013-07-08)
 ---------------------------
 
