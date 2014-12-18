@@ -1,6 +1,12 @@
 Changelog
 =========
 
+0.6 - Unreleased
+----------------
+
+* Updated CeLEDS definitions to latest upstream snapshot.  Includes
+  fixes for the Python code generation.
+
 0.5 - Released (2014-08-14)
 ---------------------------
 
