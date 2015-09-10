@@ -177,7 +177,7 @@ class CellMLAPIUtility(object):
         results = []
         for component in model.allComponents:
             results.append((
-                component.cmetaId or component.name,
+                component.name,
                 [self.serialiseNode(i) for i in component.math],
             ))
         return results
