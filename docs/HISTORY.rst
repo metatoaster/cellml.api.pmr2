@@ -1,11 +1,13 @@
 Changelog
 =========
 
-0.6 - Unreleased
-----------------
+0.6 - Released (2016-03-08)
+---------------------------
 
 * Updated CeLEDS definitions to latest upstream snapshot.  Includes
   fixes for the Python code generation.
+* Use CellML component name only as the identifier, as cmeta:id is of a
+  different specification.  This is done for compatability reason.
 
 0.5 - Released (2014-08-14)
 ---------------------------
